@@ -1,0 +1,36 @@
+services:
+  # Web Service for the main Flask App (app.py)
+  - type: web
+    name: ai-voice-agent
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 app:app"
+    instanceType: free
+    envVars:
+      - fromGroup: safemama-secrets
+      - key: WEBHOOK_URL
+        fromService:
+          type: web
+          name: ai-voice-agent
+          property: url
+    secretFiles:
+      - key: GOOGLE_APPLICATION_CREDENTIALS_FILE
+        fromGroup: safemama-secrets
+        name: google-creds.json
+
+  # Background Worker for the outbound calling script (outbound.py)
+  - type: worker
+    name: outbound-caller
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python outbound.py"
+    instanceType: free
+    envVars:
+      - fromGroup: safemama-secrets
+      - key: WEBHOOK_URL
+        fromService:
+          type: web
+          name: ai-voice-agent
+          property: url
+    # Optional: Uncomment the schedule to run the worker automatically
+    schedule: "*/5 * * * *" # Runs every 5 minutes
