@@ -18,13 +18,14 @@ services:
         fromGroup: safemama-secrets
         name: google-creds.json
 
-  # Background Worker for the outbound calling script (outbound.py)
-  - type: worker
+  # CORRECTED: This is now a Cron Job to run the outbound script on a schedule
+  - type: cron
     name: outbound-caller
     runtime: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python outbound.py"
     instanceType: free
+    schedule: "*/5 * * * *" # Runs every 5 minutes
     envVars:
       - fromGroup: safemama-secrets
       - key: WEBHOOK_URL
@@ -32,5 +33,8 @@ services:
           type: web
           name: ai-voice-agent
           property: url
-    # Optional: Uncomment the schedule to run the worker automatically
-    schedule: "*/5 * * * *" # Runs every 5 minutes
+    # ADDED: secretFiles section for consistency and future use
+    secretFiles:
+      - key: GOOGLE_APPLICATION_CREDENTIALS_FILE
+        fromGroup: safemama-secrets
+        name: google-creds.json
