@@ -1,0 +1,19 @@
+# Python Virtual Environment
+venv/
+
+# Environment variables and secrets
+.env
+*.json
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Temporary test/debug scripts
+ap.py
+db.py
+db_test.py
+
+# The Frontend files
+static/
+templates/
